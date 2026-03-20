@@ -1,0 +1,8 @@
+{
+  "name": "fullstack-test-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx http-server public -p 50000"
+  }
+}
