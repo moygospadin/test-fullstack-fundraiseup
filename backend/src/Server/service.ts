@@ -16,16 +16,17 @@ class TrackService {
       return 422;
     }
 
-    this.enqueueInsert(parsed);
+    this.insertLogs(parsed);
     return 200;
   }
 
   handleTrackerScriptRequst() {
     return path.resolve(__dirname, "..", "Tracker", "tracker.js");
   }
+
   private parseBody(body: unknown): unknown {
     if (typeof body !== "string") {
-      return body;
+      return null;
     }
 
     try {
@@ -79,7 +80,7 @@ class TrackService {
     return true;
   }
 
-  private enqueueInsert(events: TrackLoggerEvent[]): void {
+  private insertLogs(events: TrackLoggerEvent[]): void {
     if (!this.collection) {
       console.error("Mongo collection not ready, dropping events");
       return;

@@ -1,3 +1,5 @@
+import { promiseWithResolvers } from "./utils";
+
 type TrackLoggerEvent = {
   event: string;
   tags: string[];
@@ -10,4 +12,14 @@ interface Tracker {
   track(event: string, ...tags: string[]): void;
 }
 
-export { TrackLoggerEvent, Tracker };
+interface BatchManagerOptions {
+  maxMessages: number;
+  maxWaitTimeMilliseconds: number;
+}
+
+type BatchItem<T> = {
+  message: T;
+  deferred: ReturnType<typeof promiseWithResolvers<void>>;
+};
+
+export { TrackLoggerEvent, Tracker, BatchManagerOptions, BatchItem };
