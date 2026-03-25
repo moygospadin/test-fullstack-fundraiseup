@@ -1,19 +1,11 @@
 import { TrackLoggerEvent } from "../Tracker/types";
-
-class TrackRequestError extends Error {
-  readonly status: number;
-
-  constructor(status: number, message: string) {
-    super(message);
-    this.status = status;
-  }
-}
+import { AppResult } from "./appResult";
 
 class TrackEventsParser {
-  parse(body: unknown): TrackLoggerEvent[] | TrackRequestError {
+  parse(body: unknown): TrackLoggerEvent[] {
     const parsed = this.normalizeBody(body);
     if (!this.isTrackEventNotEmptyArray(parsed)) {
-      return new TrackRequestError(422, "Invalid track events payload");
+      throw AppResult.invalidRequest("Invalid track events payload");
     }
 
     return parsed;
@@ -82,4 +74,4 @@ class TrackEventsParser {
   }
 }
 
-export { TrackEventsParser, TrackRequestError };
+export { TrackEventsParser };

@@ -1,5 +1,5 @@
-import { TrackEventsParser, TrackRequestError } from "./trackEventsParser";
-import { TrackRepository, TrackResult } from "./trackRepository";
+import { TrackEventsParser } from "./trackEventsParser";
+import { TrackRepository } from "./trackRepository";
 
 class TrackService {
   constructor(
@@ -7,15 +7,9 @@ class TrackService {
     private readonly repository: TrackRepository,
   ) {}
 
-  async handleTrackRequest(
-    body: unknown,
-  ): Promise<TrackRequestError | TrackResult> {
+  async handleTrackRequest(body: unknown): Promise<void> {
     const parsed = this.parser.parse(body);
-    if (parsed instanceof TrackRequestError) {
-      return parsed;
-    }
-
-    return this.repository.insert(parsed);
+    await this.repository.insert(parsed);
   }
 }
 
