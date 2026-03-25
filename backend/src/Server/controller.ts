@@ -15,7 +15,7 @@ class TrackerController {
   }
 
   private handleTrackerScript(_req: Request, res: Response): void {
-    const trackerPath = this.service.handleTrackerScriptRequst();
+    const trackerPath = this.service.handleTrackerScriptRequest();
     res.type("application/javascript");
     res.sendFile(trackerPath);
   }

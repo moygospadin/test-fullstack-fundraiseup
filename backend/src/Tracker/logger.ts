@@ -24,16 +24,34 @@ class TrackerLogger {
   }
 
   track(event: string, ...tags: string[]): void {
-    const task = this.batchManager.add(this.buildEvent(event, tags));
-    this.outStandingBuffer.add(task);
-    task.deferred.promise.finally(() => {
-      this.outStandingBuffer.delete(task);
-    });
+    const message=this.buildEvent(event, tags);
+    const task = this.batchManager.add(message);
+    this.messageHandler(message)
+  
   }
 
+  async messageHandler(message: TrackLoggerEvent) {
+    const task = async () => {
+      try {
+      
+        await handler(message);
+
+      } catch (error: any) {
+       
+      }
+    };
+
+    const promise = task();
+
+    this.outStandingBuffer.add(promise);
+
+    promise.finally(() => {
+      this.outStandingBuffer.delete(promise);
+    });
+  }
   private close() {
-    Object.values(this.outStandingBuffer).forEach((el) =>
-      this.batchManager.add(el),
+    Array.from(this.outStandingBuffer).forEach((el) =>
+      this.batchManager.add(el.message),
     );
     this.batchManager.flush();
   }

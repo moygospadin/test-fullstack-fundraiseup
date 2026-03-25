@@ -1,5 +1,5 @@
 import { Collection } from "mongodb";
-import { TrackLoggerEvent } from "./types";
+import { TrackLoggerEvent } from "../Tracker/types";
 import path from "path";
 
 class TrackService {
@@ -12,7 +12,7 @@ class TrackService {
   handleTrackRequest(body: unknown): number {
     const parsed = this.parseBody(body);
 
-    if (!this.isTrackEventArray(parsed)) {
+    if (!this.isTrackEventNotEmptyArray(parsed)) {
       return 422;
     }
 
@@ -20,7 +20,7 @@ class TrackService {
     return 200;
   }
 
-  handleTrackerScriptRequst() {
+  handleTrackerScriptRequest() {
     return path.resolve(__dirname, "..", "Tracker", "tracker.js");
   }
 
@@ -36,11 +36,14 @@ class TrackService {
     }
   }
 
-  private isTrackEventArray(value: unknown): value is TrackLoggerEvent[] {
+  private isTrackEventNotEmptyArray(value: unknown): value is TrackLoggerEvent[] {
     if (!Array.isArray(value)) {
       return false;
     }
 
+    if(value.length==0){
+      return false;
+    }
     for (const item of value) {
       if (!this.isTrackEvent(item)) {
         return false;
