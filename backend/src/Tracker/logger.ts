@@ -1,9 +1,9 @@
 import { BatchManager } from "./batchManager";
 import { BUFFER_MAX_SIZE, RETRY_SEND_LOGS_TIMEOUT, SEND_LOGS_TIMEOUT } from "./const";
 import { TrackerRequest } from "./request";
-import { BatchItem, TrackLoggerEvent } from "./types";
+import { BatchItem, TrackLoggerEvent, Tracker } from "./types";
 
-class TrackerLogger {
+class TrackerLogger implements Tracker {
   private batchManager: BatchManager<TrackLoggerEvent>;
 
   private outStandingBuffer = new Set<BatchItem<TrackLoggerEvent>>();
