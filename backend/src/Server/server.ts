@@ -7,7 +7,6 @@ import { TrackEventsParser } from "./trackEventsParser";
 import { TrackRepository } from "./trackRepository";
 import { TrackerScriptService } from "./trackerScriptService";
 
-
 class TrackerServer {
   private readonly app = express();
   private readonly client: MongoClient;

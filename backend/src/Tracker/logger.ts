@@ -1,5 +1,9 @@
 import { BatchManager } from "./batchManager";
-import { BUFFER_MAX_SIZE, RETRY_SEND_LOGS_TIMEOUT, SEND_LOGS_TIMEOUT } from "./const";
+import {
+  BUFFER_MAX_SIZE,
+  RETRY_SEND_LOGS_TIMEOUT,
+  SEND_LOGS_TIMEOUT,
+} from "./const";
 import { TrackerRequest } from "./request";
 import { BatchItem, TrackLoggerEvent, Tracker } from "./types";
 
@@ -29,7 +33,7 @@ class TrackerLogger implements Tracker {
     this.handleMessage(buildedEvent);
   }
 
-   handleMessage(buildedEvent: TrackLoggerEvent) {
+  handleMessage(buildedEvent: TrackLoggerEvent) {
     const task = this.batchManager.add(buildedEvent);
     console.log("add");
     this.outStandingBuffer.add(task);
