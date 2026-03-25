@@ -1,97 +1,21 @@
-import { Collection } from "mongodb";
-import { TrackLoggerEvent } from "../Tracker/types";
-import path from "path";
+import { TrackEventsParser, TrackRequestError } from "./trackEventsParser";
+import { TrackRepository, TrackResult } from "./trackRepository";
 
 class TrackService {
-  private collection: Collection<TrackLoggerEvent> | null = null;
+  constructor(
+    private readonly parser: TrackEventsParser,
+    private readonly repository: TrackRepository,
+  ) {}
 
-  setCollection(collection: Collection<TrackLoggerEvent>): void {
-    this.collection = collection;
-  }
-
-  handleTrackRequest(body: unknown): number {
-    const parsed = this.parseBody(body);
-
-    if (!this.isTrackEventNotEmptyArray(parsed)) {
-      return 422;
+  async handleTrackRequest(
+    body: unknown,
+  ): Promise<TrackRequestError | TrackResult> {
+    const parsed = this.parser.parse(body);
+    if (parsed instanceof TrackRequestError) {
+      return parsed;
     }
 
-    this.insertLogs(parsed);
-    return 200;
-  }
-
-  handleTrackerScriptRequest() {
-    return path.resolve(__dirname, "..", "Tracker", "tracker.js");
-  }
-
-  private parseBody(body: unknown): unknown {
-    if (typeof body !== "string") {
-      return null;
-    }
-
-    try {
-      return JSON.parse(body);
-    } catch {
-      return null;
-    }
-  }
-
-  private isTrackEventNotEmptyArray(value: unknown): value is TrackLoggerEvent[] {
-    if (!Array.isArray(value)) {
-      return false;
-    }
-
-    if(value.length==0){
-      return false;
-    }
-    for (const item of value) {
-      if (!this.isTrackEvent(item)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  private isTrackEvent(value: unknown): value is TrackLoggerEvent {
-    if (!value || typeof value !== "object") {
-      return false;
-    }
-
-    const v = value as Record<string, unknown>;
-    return (
-      typeof v.event === "string" &&
-      this.isStringArray(v.tags) &&
-      typeof v.url === "string" &&
-      typeof v.title === "string" &&
-      typeof v.ts === "number" &&
-      Number.isFinite(v.ts)
-    );
-  }
-
-  private isStringArray(value: unknown): value is string[] {
-    if (!Array.isArray(value)) {
-      return false;
-    }
-
-    for (const item of value) {
-      if (typeof item !== "string") {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  private insertLogs(events: TrackLoggerEvent[]): void {
-    if (!this.collection) {
-      console.error("Mongo collection not ready, dropping events");
-      return;
-    }
-
-    this.collection.insertMany(events).catch((err) => {
-      console.error("Failed to insert events", err);
-    });
+    return this.repository.insert(parsed);
   }
 }
 

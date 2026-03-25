@@ -1,15 +1,22 @@
 import express, { Request, Response, NextFunction } from "express";
 import { MongoClient } from "mongodb";
-
 import { TrackerController } from "./controller";
 import { TrackService } from "./service";
 import { TrackLoggerEvent } from "../Tracker/types";
+import { TrackEventsParser } from "./trackEventsParser";
+import { TrackRepository } from "./trackRepository";
+import { TrackerScriptService } from "./trackerScriptService";
 
 
 class TrackerServer {
   private readonly app = express();
   private readonly client: MongoClient;
-  private readonly service = new TrackService();
+  private readonly repository = new TrackRepository();
+  private readonly service = new TrackService(
+    new TrackEventsParser(),
+    this.repository,
+  );
+  private readonly trackerScriptService = new TrackerScriptService();
   private readonly controller: TrackerController;
 
   constructor(
@@ -17,13 +24,16 @@ class TrackerServer {
     private readonly mongoDb: string,
   ) {
     this.client = new MongoClient(this.mongoUrl);
-    this.controller = new TrackerController(this.service);
+    this.controller = new TrackerController(
+      this.service,
+      this.trackerScriptService,
+    );
     this.configureMiddleware();
     this.controller.register(this.app);
   }
 
-  start(port: number): void {
-    this.connectMongo();
+  async start(port: number): Promise<void> {
+    await this.connectMongo();
     this.app.listen(port, () => {
       console.log(`Tracker server listening on http://localhost:${port}`);
     });
@@ -31,6 +41,7 @@ class TrackerServer {
 
   private configureMiddleware(): void {
     this.app.use(this.handleCors.bind(this));
+    this.app.use(express.json({ limit: "1mb" }));
     this.app.use(express.text({ type: "text/plain", limit: "1mb" }));
   }
 
@@ -45,20 +56,19 @@ class TrackerServer {
     next();
   }
 
-  private connectMongo(): void {
-    this.client
-      .connect()
-      .then(() => {
-        const collection = this.client
-          .db(this.mongoDb)
-          .collection<TrackLoggerEvent>("tracks");
-        this.service.setCollection(collection);
+  private async connectMongo(): Promise<void> {
+    try {
+      await this.client.connect();
+      const collection = this.client
+        .db(this.mongoDb)
+        .collection<TrackLoggerEvent>("tracks");
+      this.repository.setCollection(collection);
 
-        console.log("Mongo connected");
-      })
-      .catch((err) => {
-        console.error("Mongo connection failed", err);
-      });
+      console.log("Mongo connected");
+    } catch (err) {
+      console.error("Mongo connection failed", err);
+      throw err;
+    }
   }
 }
 
