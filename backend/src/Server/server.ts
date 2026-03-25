@@ -3,7 +3,8 @@ import { MongoClient } from "mongodb";
 
 import { TrackerController } from "./controller";
 import { TrackService } from "./service";
-import { TrackLoggerEvent } from "./types";
+import { TrackLoggerEvent } from "../Tracker/types";
+
 
 class TrackerServer {
   private readonly app = express();
@@ -30,7 +31,7 @@ class TrackerServer {
 
   private configureMiddleware(): void {
     this.app.use(this.handleCors.bind(this));
-    this.app.use(express.text({ type: "*/*", limit: "1mb" }));
+    this.app.use(express.text({ type: "text/plain", limit: "1mb" }));
   }
 
   private handleCors(req: Request, res: Response, next: NextFunction): void {

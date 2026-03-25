@@ -1,5 +1,5 @@
-import { BatchManager } from "./BatchManager";
-import { BUFFER_MAX_SIZE, SEND_LOGS_TIMEOUT } from "./const";
+import { BatchManager } from "./batchManager";
+import { BUFFER_MAX_SIZE, RETRY_SEND_LOGS_TIMEOUT, SEND_LOGS_TIMEOUT } from "./const";
 import { TrackerRequest } from "./request";
 import { BatchItem, TrackLoggerEvent } from "./types";
 
@@ -23,15 +23,22 @@ class TrackerLogger {
     });
   }
 
-   track(event: string, ...tags: string[]): void {
-    const task = this.batchManager.add(this.buildEvent(event, tags));
+  track(event: string, ...tags: string[]): void {
+    const buildedEvent = this.buildEvent(event, tags);
+
+    this.handleMessage(buildedEvent);
+  }
+
+   handleMessage(buildedEvent: TrackLoggerEvent) {
+    const task = this.batchManager.add(buildedEvent);
+    console.log("add");
     this.outStandingBuffer.add(task);
     task.deferred.promise.finally(() => {
+      console.log("delete");
       this.outStandingBuffer.delete(task);
     });
   }
 
- 
   private close() {
     Array.from(this.outStandingBuffer).forEach((el) =>
       this.batchManager.add(el.message),
@@ -43,16 +50,25 @@ class TrackerLogger {
     try {
       await TrackerRequest.sendEvents(buffer);
 
-      buffer.forEach((el) => el.deferred.resolve());
+      buffer.forEach((el) => {
+        console.log("resolve try");
+        el.deferred.resolve();
+      });
     } catch {
       await new Promise((resolve) =>
         setTimeout(() => {
           resolve(null);
-        }, 1000),
+        }, RETRY_SEND_LOGS_TIMEOUT),
       );
       buffer.forEach((el) => {
-        el.deferred.reject();
-        this.batchManager.add(el.message);
+        console.log("resolve catch");
+        el.deferred.resolve();
+      });
+      //Let all microtask resolve before adding into events to outStandingBuffer
+      await Promise.resolve();
+
+      buffer.forEach((el) => {
+        this.handleMessage(el.message);
       });
     }
   }

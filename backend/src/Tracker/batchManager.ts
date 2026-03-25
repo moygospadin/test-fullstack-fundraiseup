@@ -7,7 +7,7 @@ class BatchManager<T> {
 
   private listener: ((batch: BatchItem<T>[]) => Promise<void>) | null = null;
 
-  constructor(private readonly options?: BatchManagerOptions) {}
+  constructor(private readonly options: BatchManagerOptions) {}
 
   public on(handler: (batch: BatchItem<T>[]) => Promise<void>) {
     this.listener = handler;
