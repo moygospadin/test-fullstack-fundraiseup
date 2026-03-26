@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 import { TrackService } from "./service";
 import { TrackerScriptService } from "./trackerScriptService";
-import { AppResult } from "./appResult";
+import { HttpError } from "./httpError";
 
 class TrackerController {
   constructor(
@@ -19,13 +19,10 @@ class TrackerController {
       await this.service.handleTrackRequest(req.body);
       res.sendStatus(200);
     } catch (err) {
-      const result =
-        err instanceof AppResult
-          ? err
-          : AppResult.internal("Internal server error");
-      if (!(err instanceof AppResult)) {
-        console.error("Unhandled error in track handler", err);
-      }
+      const result = HttpError.fromUnknown(
+        err,
+        "Unhandled error in track handler",
+      );
 
       res.status(result.status).json({
         code: result.code,

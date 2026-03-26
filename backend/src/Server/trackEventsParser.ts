@@ -1,11 +1,11 @@
 import { TrackLoggerEvent } from "../Tracker/types";
-import { AppResult } from "./appResult";
+import { HttpError } from "./httpError";
 
 class TrackEventsParser {
   parse(body: unknown): TrackLoggerEvent[] {
     const parsed = this.normalizeBody(body);
     if (!this.isTrackEventNotEmptyArray(parsed)) {
-      throw AppResult.invalidRequest("Invalid track events payload");
+      throw HttpError.invalidRequest("Invalid track events payload");
     }
 
     return parsed;
