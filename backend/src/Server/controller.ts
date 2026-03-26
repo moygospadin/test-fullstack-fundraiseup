@@ -1,11 +1,11 @@
 import { Express, Request, Response } from "express";
-import { TrackService } from "./service";
+import { TrackerService } from "./trackerService";
 import { TrackerScriptService } from "./trackerScriptService";
 import { HttpError } from "./httpError";
 
-class TrackerController {
+class Controller {
   constructor(
-    private readonly service: TrackService,
+    private readonly service: TrackerService,
     private readonly trackerScriptService: TrackerScriptService,
   ) {}
 
@@ -38,4 +38,4 @@ class TrackerController {
   }
 }
 
-export { TrackerController };
+export { Controller };

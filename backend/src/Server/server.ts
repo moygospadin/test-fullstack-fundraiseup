@@ -1,32 +1,29 @@
 import express, { Request, Response, NextFunction } from "express";
 import { MongoClient } from "mongodb";
-import { TrackerController } from "./controller";
-import { TrackService } from "./service";
+import { Controller } from "./controller";
+import { TrackerService } from "./trackerService";
 import { TrackLoggerEvent } from "../Tracker/types";
-import { TrackEventsParser } from "./trackEventsParser";
-import { TrackRepository } from "./trackRepository";
+import { TrackerEventsParser } from "./trackerEventsParser";
+import { TrackerRepository } from "./trackerRepository";
 import { TrackerScriptService } from "./trackerScriptService";
 
-class TrackerServer {
+class Server {
   private readonly app = express();
   private readonly client: MongoClient;
-  private readonly repository = new TrackRepository();
-  private readonly service = new TrackService(
-    new TrackEventsParser(),
+  private readonly repository = new TrackerRepository();
+  private readonly service = new TrackerService(
+    new TrackerEventsParser(),
     this.repository,
   );
   private readonly trackerScriptService = new TrackerScriptService();
-  private readonly controller: TrackerController;
+  private readonly controller: Controller;
 
   constructor(
     private readonly mongoUrl: string,
     private readonly mongoDb: string,
   ) {
     this.client = new MongoClient(this.mongoUrl);
-    this.controller = new TrackerController(
-      this.service,
-      this.trackerScriptService,
-    );
+    this.controller = new Controller(this.service, this.trackerScriptService);
     this.configureMiddleware();
     this.controller.register(this.app);
   }
@@ -71,4 +68,4 @@ class TrackerServer {
   }
 }
 
-export { TrackerServer };
+export { Server };

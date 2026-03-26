@@ -2,7 +2,7 @@ import { Collection } from "mongodb";
 import { TrackLoggerEvent } from "../Tracker/types";
 import { HttpError } from "./httpError";
 
-class TrackRepository {
+class TrackerRepository {
   private collection: Collection<TrackLoggerEvent> | null = null;
 
   setCollection(collection: Collection<TrackLoggerEvent>): void {
@@ -23,4 +23,4 @@ class TrackRepository {
   }
 }
 
-export { TrackRepository };
+export { TrackerRepository };

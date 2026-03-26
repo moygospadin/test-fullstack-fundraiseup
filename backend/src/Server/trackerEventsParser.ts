@@ -1,7 +1,7 @@
 import { TrackLoggerEvent } from "../Tracker/types";
 import { HttpError } from "./httpError";
 
-class TrackEventsParser {
+class TrackerEventsParser {
   parse(body: unknown): TrackLoggerEvent[] {
     const parsed = this.normalizeBody(body);
     if (!this.isTrackEventNotEmptyArray(parsed)) {
@@ -74,4 +74,4 @@ class TrackEventsParser {
   }
 }
 
-export { TrackEventsParser };
+export { TrackerEventsParser };
