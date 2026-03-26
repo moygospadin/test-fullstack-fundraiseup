@@ -8,7 +8,7 @@ class TrackerEventsParser {
       throw HttpError.invalidRequest("Invalid track events payload");
     }
 
-    return parsed.map(dirtyEvent=>this.buildEvent(dirtyEvent));
+    return parsed.map((dirtyEvent) => this.buildEvent(dirtyEvent));
   }
 
   private normalizeBody(body: unknown): unknown {

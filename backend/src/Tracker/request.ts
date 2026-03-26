@@ -21,6 +21,18 @@ class TrackerRequest {
       throw error;
     }
   }
+
+  static sendEventsBeacon(events: BatchItem<TrackLoggerEvent>[]): void {
+    if (typeof navigator === "undefined" || !navigator.sendBeacon) {
+      return;
+    }
+
+    const body = JSON.stringify(events.map((el) => el.message));
+    const payload = new Blob([body], {
+      type: "text/plain;charset=UTF-8",
+    });
+    navigator.sendBeacon(this.endpoint, payload);
+  }
 }
 
 export { TrackerRequest };

@@ -6,7 +6,6 @@ import {
 } from "./const";
 import { TrackerRequest } from "./request";
 import { BatchItem, TrackLoggerEvent, Tracker } from "./types";
-
 class TrackerLogger implements Tracker {
   private batchManager: BatchManager<TrackLoggerEvent>;
 
@@ -53,7 +52,7 @@ class TrackerLogger implements Tracker {
       return;
     }
 
-     this.sendLogs(batch);
+    TrackerRequest.sendEventsBeacon(batch);
   }
 
   private async sendLogs(buffer: BatchItem<TrackLoggerEvent>[]): Promise<void> {
