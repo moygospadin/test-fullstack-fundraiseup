@@ -13,6 +13,10 @@ class BatchManager<T> {
     this.listener = handler;
   }
 
+  public unsubscribe(): void {
+    this.listener = null;
+  }
+
   public add(message: T): BatchItem<T> {
     const deferred = promiseWithResolvers<void>();
     const bufferMessage = { deferred, message };
@@ -27,6 +31,17 @@ class BatchManager<T> {
     }
 
     return bufferMessage;
+  }
+
+  public pop(): BatchItem<T>[] {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+
+    const batch = this.buffer;
+    this.buffer = [];
+    return batch;
   }
 
   public async flush() {

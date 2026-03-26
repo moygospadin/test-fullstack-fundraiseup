@@ -44,10 +44,16 @@ class TrackerLogger implements Tracker {
   }
 
   private close() {
-    Array.from(this.outStandingBuffer).forEach((el) =>
-      this.batchManager.add(el.message),
-    );
-    this.batchManager.flush();
+    this.batchManager.unsubscribe();
+    const batchFromBuffer = this.batchManager.pop();
+    const batchSet = new Set<BatchItem<TrackLoggerEvent>>(batchFromBuffer);
+    this.outStandingBuffer.forEach((item) => batchSet.add(item));
+    const batch = Array.from(batchSet);
+    if (batch.length === 0) {
+      return;
+    }
+
+     this.sendLogs(batch);
   }
 
   private async sendLogs(buffer: BatchItem<TrackLoggerEvent>[]): Promise<void> {
